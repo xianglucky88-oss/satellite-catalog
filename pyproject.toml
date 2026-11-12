@@ -1,0 +1,7 @@
+[project]
+name = "satellite-catalog"
+version = "0.1.0"
+requires-python = ">=3.11"
+
+[project.scripts]
+satellite-catalog = "satellite_catalog.cli:main"
