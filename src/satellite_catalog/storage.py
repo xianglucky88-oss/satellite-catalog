@@ -57,5 +57,58 @@ class ObservationStore:
             "rejected": self.conn.execute("SELECT COUNT(*) FROM rejected_records").fetchone()[0],
         }
 
+    def total_observations(self) -> int:
+        return self.conn.execute("SELECT COUNT(*) FROM observations").fetchone()[0]
+
+    def query_candidates(
+        self,
+        *,
+        acquired_after: str,
+        acquired_before: str,
+        max_cloud_cover: float,
+    ) -> list[dict[str, object]]:
+        """在真实存储上执行目录筛选（组合查询的第一阶段）。
+
+        只通过 SQL 缩小候选范围：采集时间落在闭区间
+        ``[acquired_after, acquired_before]`` 内，且 ``cloud_cover`` 是
+        数值型 JSON 且不超过上限。字段级几何校验、来源去重与元数据
+        冲突判定不在本层处理，交由 query/selection 模块完成，保证
+        “目录筛选、几何规范化、组合选择”三个职责彼此独立。
+        """
+        sql = """
+            SELECT source,
+                   record_key,
+                   observed_at,
+                   payload_json,
+                   json_extract(payload_json, '$.product_id')  AS product_id,
+                   json_extract(payload_json, '$.version')     AS version,
+                   json_extract(payload_json, '$.acquired_at') AS acquired_at,
+                   json_extract(payload_json, '$.cloud_cover') AS cloud_cover,
+                   json_extract(payload_json, '$.platform')    AS platform
+              FROM observations
+             WHERE json_valid(payload_json) = 1
+               AND json_type(payload_json, '$.cloud_cover') IN ('real', 'integer')
+               AND json_extract(payload_json, '$.cloud_cover') >= 0
+               AND json_extract(payload_json, '$.cloud_cover') <= ?
+               AND json_extract(payload_json, '$.acquired_at') >= ?
+               AND json_extract(payload_json, '$.acquired_at') <= ?
+             ORDER BY product_id, version, source, observed_at
+        """
+        rows = self.conn.execute(
+            sql, (max_cloud_cover, acquired_after, acquired_before)
+        ).fetchall()
+        columns = (
+            "source",
+            "record_key",
+            "observed_at",
+            "payload_json",
+            "product_id",
+            "version",
+            "acquired_at",
+            "cloud_cover",
+            "platform",
+        )
+        return [dict(zip(columns, row)) for row in rows]
+
     def close(self) -> None:
         self.conn.close()
