@@ -1,0 +1,13 @@
+{
+  "stream": "demo-lineage",
+  "product_id": "P-100",
+  "revision": 10,
+  "issued_at": "2026-11-02T00:00:00Z",
+  "supersedes": [
+    {
+      "successor": "v2",
+      "predecessor": "v1"
+    }
+  ],
+  "withdrawn": []
+}

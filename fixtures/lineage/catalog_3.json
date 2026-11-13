@@ -1,0 +1,14 @@
+[
+  {
+    "source": "catalog-api",
+    "observed_at": "2026-11-06T01:00:00Z",
+    "payload": {
+      "product_id": "P-100",
+      "platform": "SAT-A",
+      "acquired_at": "2026-11-05T18:00:00Z",
+      "cloud_cover": 2.1,
+      "bbox": "1,2,3,4",
+      "version": "v4"
+    }
+  }
+]
