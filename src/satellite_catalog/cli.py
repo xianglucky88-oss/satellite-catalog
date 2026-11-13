@@ -13,6 +13,11 @@ def main() -> None:
     parser.add_argument("--timeout", type=float, default=30.0)
     parser.add_argument("--raw-dir", help="directory for immutable raw HTTP responses")
     parser.add_argument("--records-key", help="dot-separated JSON key containing the record list")
+    parser.add_argument(
+        "--access-scope",
+        help="explicit cache scope for this view of the endpoint; "
+        "cached records are never reused across scopes",
+    )
     args = parser.parse_args()
     if args.fixture:
         result = run_fixture(args.fixture, args.database)
@@ -23,6 +28,7 @@ def main() -> None:
             timeout=args.timeout,
             raw_dir=args.raw_dir,
             records_key=args.records_key,
+            access_scope=args.access_scope,
         )
     print(json.dumps(result, ensure_ascii=False, sort_keys=True))
 

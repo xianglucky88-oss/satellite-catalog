@@ -27,6 +27,14 @@ def run_url(
     timeout: float = 30.0,
     raw_dir: str | None = None,
     records_key: str | None = None,
+    access_scope: str | None = None,
 ) -> dict[str, int]:
-    source = HttpJsonSource(url, timeout=timeout, raw_dir=raw_dir, records_key=records_key)
-    return _run_records(source.read(), database)
+    source = HttpJsonSource(
+        url,
+        timeout=timeout,
+        raw_dir=raw_dir,
+        records_key=records_key,
+        access_scope=access_scope,
+    )
+    records, _fetch = source.read_with_info()
+    return _run_records(records, database)
